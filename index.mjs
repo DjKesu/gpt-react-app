@@ -58,13 +58,13 @@ async function installDependencies(projectName) {
   }
 }
 
-async function generateContent(instance, prompt){
+async function generateContent(instance, prompt) {
   const completion = await instance.createChatCompletion({
-    model:"gpt-3.5-turbo",
-    messages:[{'role':'user','content':prompt}],
+    model: "gpt-3.5-turbo",
+    messages: [{ role: "user", content: prompt }],
     temperature: 1,
     max_tokens: 2048,
-    top_p: 1
+    top_p: 1,
   });
   return completion.data.choices[0].message.content;
 }
@@ -77,6 +77,41 @@ async function createInstance(apiKey, orgId) {
 
   const openAiApi = new OpenAIApi(openAiConfig);
   return openAiApi;
+}
+
+async function createFoldersAndFiles(projectFolder, content) {
+  const codeSegments = content.split('In');
+  const directoryStructure = codeSegments.shift().trim();
+
+  // Create the projectFolder if it doesn't exist
+  if (!(await fs.pathExists(projectFolder))) {
+    await fs.mkdir(projectFolder);
+  }
+
+  // Function to create directories and files recursively
+  async function createDirectoriesAndFiles(directory, currentPath = '') {
+    for (const line of directory.split('\n')) {
+      if (line.trim() === '') continue;
+
+      const [, folderName, fileName] = line.match(/-\s([\w-.]+)(?:\.(\w+))?$/);
+
+      const fullPath = path.join(projectFolder, currentPath, folderName);
+      const isFile = !!fileName;
+
+      if (isFile) {
+        const codeContent = codeSegments.shift().trim();
+
+        await fs.writeFile(path.join(fullPath, fileName), codeContent);
+      } else {
+        await fs.mkdir(fullPath);
+
+        const subdirectory = codeSegments.shift().trim();
+        await createDirectoriesAndFiles(subdirectory, path.join(currentPath, folderName));
+      }
+    }
+  }
+
+  await createDirectoriesAndFiles(directoryStructure);
 }
 
 async function promptUser() {
@@ -117,16 +152,17 @@ async function promptUser() {
     exit(1);
   }
 
-  // Create React app
-  // try {
-  //   const createReactAppResult = await createReactApp(projectName);
-  // } catch (error) {
-  //   console.error("Error creating React app:", error.message);
-  // }
+  //Create React app
+  try {
+    const createReactAppResult = await createReactApp(projectName);
+  } catch (error) {
+    console.error("Error creating React app:", error.message);
+  }
 
   let finalPrompt = `Based on the directory structure of a create-react-app generated folder, give me code to ${prompt}. For all files and the code you give make sure to specify a directory structure in the format of ${projectName}/{foldername}, if the file belongs to a folder, at the top of each code. If a new folder is being created other than src and public, specify the name of the folders and their directory at the top of the response. Generate a maximum of 2000 tokens`;
   const content = await generateContent(openAiApi, finalPrompt);
-  console.log('Returned Content', content);
+  console.log("Returned Content", content);
+  await createFoldersAndFiles(projectName, content);
 }
 
 function run() {
