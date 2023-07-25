@@ -169,4 +169,4 @@ function run() {
   promptUser();
 }
 
-run();
+module.exports = run;
