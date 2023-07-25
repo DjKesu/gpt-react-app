@@ -58,15 +58,24 @@ async function installDependencies(projectName) {
   }
 }
 
+async function generateContent(instance, prompt){
+  const completion = await instance.createChatCompletion({
+    model:"gpt-3.5-turbo",
+    messages:[{'role':'user','content':prompt}],
+    temperature: 1,
+    max_tokens: 2048,
+    top_p: 1
+  });
+  return completion.data.choices[0].message.content;
+}
+
 async function createInstance(apiKey, orgId) {
-  console.log("Creating OpenAI API instance");
   const openAiConfig = new Configuration({
     organization: orgId,
     apiKey: apiKey,
   });
 
   const openAiApi = new OpenAIApi(openAiConfig);
-  console.log("OpenAI API instance created");
   return openAiApi;
 }
 
@@ -96,10 +105,12 @@ async function promptUser() {
     },
   ]);
   console.log(projectName, prompt, apiKey, orgId);
-
+  let openAiApi;
   try {
     // Create OpenAI API instance
-    const openAiApi = await createInstance(apiKey, orgId);
+    const spinner = ora("Creating OpenAI instance").start();
+    openAiApi = await createInstance(apiKey, orgId);
+    spinner.succeed("Instance created successfully!");
     // console.log(openAiApi);
   } catch (error) {
     console.error("Error creating OpenAI API instance:", error.message);
@@ -107,11 +118,15 @@ async function promptUser() {
   }
 
   // Create React app
-  try {
-    const createReactAppResult = await createReactApp(projectName);
-  } catch (error) {
-    console.error("Error creating React app:", error.message);
-  }
+  // try {
+  //   const createReactAppResult = await createReactApp(projectName);
+  // } catch (error) {
+  //   console.error("Error creating React app:", error.message);
+  // }
+
+  let finalPrompt = `Based on the directory structure of a create-react-app generated folder, give me code to ${prompt}. For all files and the code you give make sure to specify a directory structure in the format of ${projectName}/{foldername}, if the file belongs to a folder, at the top of each code. If a new folder is being created other than src and public, specify the name of the folders and their directory at the top of the response. Generate a maximum of 2000 tokens`;
+  const content = await generateContent(openAiApi, finalPrompt);
+  console.log('Returned Content', content);
 }
 
 function run() {
