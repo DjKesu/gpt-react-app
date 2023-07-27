@@ -1,16 +1,16 @@
-// import inquirer from "inquirer";
-// import { Configuration, OpenAIApi } from "openai";
-// import execa from "execa";
-// import fs from "fs-extra";
-// import { exit } from "process";
-// import ora from "ora";
+import inquirer from "inquirer";
+import { Configuration, OpenAIApi } from "openai";
+import execa from "execa";
+import fs from "fs-extra";
+import { exit } from "process";
+import ora from "ora";
 
-const inquirer = require("inquirer");
-const { Configuration, OpenAIApi } = require("openai");
-const execa = require("execa");
-const fs = require("fs-extra");
-const { exit } = require("process");
-const ora = require("ora");
+// const inquirer = require("inquirer");
+// const { Configuration, OpenAIApi } = require("openai");
+// const execa = require("execa");
+// const fs = require("fs-extra");
+// const { exit } = require("process");
+// const ora = require("ora");
 
 async function createReactApp(projectName) {
   try {
@@ -172,8 +172,4 @@ async function promptUser() {
   // await createFoldersAndFiles(projectName, content);
 }
 
-function run() {
-  promptUser();
-}
-
-module.exports = run;
+promptUser();
