@@ -1,9 +1,16 @@
-import inquirer from "inquirer";
-import { Configuration, OpenAIApi } from "openai";
-import execa from "execa";
-import fs from "fs-extra";
-import { exit } from "process";
-import ora from "ora";
+// import inquirer from "inquirer";
+// import { Configuration, OpenAIApi } from "openai";
+// import execa from "execa";
+// import fs from "fs-extra";
+// import { exit } from "process";
+// import ora from "ora";
+
+const inquirer = require("inquirer");
+const { Configuration, OpenAIApi } = require("openai");
+const execa = require("execa");
+const fs = require("fs-extra");
+const { exit } = require("process");
+const ora = require("ora");
 
 async function createReactApp(projectName) {
   try {
@@ -162,7 +169,7 @@ async function promptUser() {
   let finalPrompt = `Based on the directory structure of a create-react-app generated folder, give me code to ${prompt}. For all files and the code you give make sure to specify a directory structure in the format of ${projectName}/{foldername}, if the file belongs to a folder, at the top of each code. If a new folder is being created other than src and public, specify the name of the folders and their directory at the top of the response. Generate a maximum of 2000 tokens`;
   const content = await generateContent(openAiApi, finalPrompt);
   console.log("Returned Content", content);
-  await createFoldersAndFiles(projectName, content);
+  // await createFoldersAndFiles(projectName, content);
 }
 
 function run() {
