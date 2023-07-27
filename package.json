@@ -1,15 +1,15 @@
 {
   "name": "gpt-react-app",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "CLI Tool to create pre-filled React Applications",
   "main": "index.js",
   "type": "module",
   "bin": {
-    "gpt-react-app": "index.js"
+    "gpt-react-app": "dist/index.js"
   },
   "scripts": {
     "test": "jest --config=jest.config.js",
-    "start": "node index.js"
+    "start": "babel-node index.js"
   },
   "repository": {
     "type": "git",

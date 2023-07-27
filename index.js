@@ -1,6 +1,6 @@
 import inquirer from "inquirer";
 import { exit } from "process";
-import ora, { spinners } from "ora";
+import ora from "ora";
 
 import createReactApp from "./utils/createReactApp.mjs";
 import { generateContent } from "./utils/contentGeneration.mjs";
