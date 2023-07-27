@@ -1,6 +1,6 @@
 {
   "name": "gpt-react-app",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "CLI Tool to create pre-filled React Applications",
   "main": "index.mjs",
   "type": "module",
