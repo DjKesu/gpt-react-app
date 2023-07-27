@@ -1,125 +1,14 @@
 import inquirer from "inquirer";
-import { Configuration, OpenAIApi } from "openai";
-import execa from "execa";
-import fs from "fs-extra";
 import { exit } from "process";
-import ora from "ora";
+import ora, { spinners } from "ora";
 
-// const inquirer = require("inquirer");
-// const { Configuration, OpenAIApi } = require("openai");
-// const execa = require("execa");
-// const fs = require("fs-extra");
-// const { exit } = require("process");
-// const ora = require("ora");
+import createReactApp from "./utils/createReactApp.mjs";
+import { generateContent } from "./utils/contentGeneration.mjs";
+import { createInstance } from "./utils/contentGeneration.mjs";
+import modifyFiles from "./utils/modifyFiles.mjs";
+import installDependencies from "./utils/installDependencies.mjs";
+import createFoldersAndFiles from "./utils/createFoldersAndFiles.mjs";
 
-async function createReactApp(projectName) {
-  try {
-    const spinner = ora("Creating React app").start();
-    const { stdout } = await execa("npx", ["create-react-app", projectName]);
-    spinner.succeed("React app created successfully.");
-    return stdout;
-  } catch (error) {
-    if (error.stdout.includes("conflict")) {
-      return "React app already exists. Can't overwrite. Retry with a different name.";
-    }
-    return error.shortMessage;
-  }
-}
-
-async function modifyComponentFile(
-  projectName,
-  componentName,
-  generatedContent
-) {
-  const componentFilePath = `./${projectName}/src/${componentName}.js`;
-  try {
-    // Read the existing component file
-    let componentFileContent = await fs.readFile(componentFilePath, "utf8");
-
-    // Modify the content (replace a placeholder with the generated content)
-    const placeholder = "// GPT_GENERATED_CONTENT";
-    componentFileContent = componentFileContent.replace(
-      placeholder,
-      generatedContent
-    );
-
-    // Write the modified content back to the file
-    await fs.writeFile(componentFilePath, componentFileContent, "utf8");
-
-    console.log(`Modified ${componentName}.js with generated content.`);
-  } catch (error) {
-    console.error("Error modifying component file:", error.message);
-  }
-}
-
-async function installDependencies(projectName) {
-  try {
-    // Change the working directory to the React app project
-    process.chdir(projectName);
-
-    // Install dependencies using npm
-    await execa("npm", ["install"]);
-    console.log("Dependencies installed successfully.");
-  } catch (error) {
-    console.error("Error installing dependencies:", error.message);
-  }
-}
-
-async function generateContent(instance, prompt) {
-  const completion = await instance.createChatCompletion({
-    model: "gpt-3.5-turbo",
-    messages: [{ role: "user", content: prompt }],
-    temperature: 1,
-    max_tokens: 2048,
-    top_p: 1,
-  });
-  return completion.data.choices[0].message.content;
-}
-
-async function createInstance(apiKey, orgId) {
-  const openAiConfig = new Configuration({
-    organization: orgId,
-    apiKey: apiKey,
-  });
-
-  const openAiApi = new OpenAIApi(openAiConfig);
-  return openAiApi;
-}
-
-async function createFoldersAndFiles(projectFolder, content) {
-  const codeSegments = content.split('In');
-  const directoryStructure = codeSegments.shift().trim();
-
-  // Create the projectFolder if it doesn't exist
-  if (!(await fs.pathExists(projectFolder))) {
-    await fs.mkdir(projectFolder);
-  }
-
-  // Function to create directories and files recursively
-  async function createDirectoriesAndFiles(directory, currentPath = '') {
-    for (const line of directory.split('\n')) {
-      if (line.trim() === '') continue;
-
-      const [, folderName, fileName] = line.match(/-\s([\w-.]+)(?:\.(\w+))?$/);
-
-      const fullPath = path.join(projectFolder, currentPath, folderName);
-      const isFile = !!fileName;
-
-      if (isFile) {
-        const codeContent = codeSegments.shift().trim();
-
-        await fs.writeFile(path.join(fullPath, fileName), codeContent);
-      } else {
-        await fs.mkdir(fullPath);
-
-        const subdirectory = codeSegments.shift().trim();
-        await createDirectoriesAndFiles(subdirectory, path.join(currentPath, folderName));
-      }
-    }
-  }
-
-  await createDirectoriesAndFiles(directoryStructure);
-}
 
 async function promptUser() {
   // Get user's project name, prompt, openAI key, and openAI orgId
@@ -146,7 +35,7 @@ async function promptUser() {
       type: "input",
     },
   ]);
-  console.log(projectName, prompt, apiKey, orgId);
+  // console.log(projectName, prompt, apiKey, orgId);
   let openAiApi;
   try {
     // Create OpenAI API instance
@@ -167,8 +56,10 @@ async function promptUser() {
   }
 
   let finalPrompt = `Based on the directory structure of a create-react-app generated folder, give me code to ${prompt}. For all files and the code you give make sure to specify a directory structure in the format of ${projectName}/{foldername}, if the file belongs to a folder, at the top of each code. If a new folder is being created other than src and public, specify the name of the folders and their directory at the top of the response. Generate a maximum of 2000 tokens`;
+  spinner = ora("Wielding AI powers").start();
   const content = await generateContent(openAiApi, finalPrompt);
-  console.log("Returned Content", content);
+  spinner.succeed("Returned Content is as follows:");
+  console.log(content);
   // await createFoldersAndFiles(projectName, content);
 }
 

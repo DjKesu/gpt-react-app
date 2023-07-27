@@ -1,9 +1,12 @@
 {
   "name": "gpt-react-app",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "CLI Tool to create pre-filled React Applications",
   "main": "index.mjs",
   "type": "module",
+  "bin": {
+    "gpt-react-app": "index.mjs"
+  },
   "scripts": {
     "test": "jest --config=jest.config.js",
     "start": "node index.mjs"
@@ -30,9 +33,12 @@
     "openai": "^3.3.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.22.9",
     "@babel/core": "^7.22.9",
+    "@babel/node": "^7.22.6",
     "@babel/preset-env": "^7.22.9",
     "esm": "^3.2.25",
+    "execa": "^7.2.0",
     "fs-extra": "^11.1.1",
     "jest": "^29.6.1",
     "ora": "^6.3.1"
