@@ -1,11 +1,11 @@
 import { Configuration, OpenAIApi } from "openai";
 
-export async function generateContent(instance, prompt) {
+export async function generateContent(instance, prompt,tokens) {
   const completion = await instance.createChatCompletion({
     model: "gpt-3.5-turbo",
     messages: [{ role: "user", content: prompt }],
     temperature: 1,
-    max_tokens: 2048,
+    max_tokens: tokens,
     top_p: 1,
   });
   return completion.data.choices[0].message.content;
