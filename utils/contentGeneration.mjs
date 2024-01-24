@@ -1,22 +1,21 @@
-import { Configuration, OpenAIApi } from "openai";
+import OpenAI from "openai";
 
-export async function generateContent(instance, prompt,tokens) {
-  const completion = await instance.createChatCompletion({
+export async function generateContent(instance, prompt, tokens) {
+  const completion = await instance.chat.completions.create({
     model: "gpt-3.5-turbo",
     messages: [{ role: "user", content: prompt }],
     temperature: 1,
-    max_tokens: tokens,
+    // max_tokens: tokens,
     top_p: 1,
   });
-  return completion.data.choices[0].message.content;
+  return completion.choices[0].message.content;
 }
 
 export async function createInstance(apiKey, orgId) {
-  const openAiConfig = new Configuration({
+  const openai = new OpenAI({
     organization: orgId,
     apiKey: apiKey,
   });
 
-  const openAiApi = new OpenAIApi(openAiConfig);
-  return openAiApi;
+  return openai;
 }

@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import inquirer from "inquirer";
 import { exit } from "process";
 import ora from "ora";
@@ -58,8 +60,8 @@ async function promptUser() {
   }
   let currentDirectory = path.join(process.cwd(), projectName);
   console.log(currentDirectory);
-  let finalPrompt = `Based on the directory structure of a create-react-app generated folder, give me code to ${prompt}. For all files and the code you give make sure to specify a directory structure in the format of ${projectName}/{foldername}, if the file belongs to a folder, at the top of each code. If a new folder is being created other than src and public, specify the name of the folders and their directory at the top of the response. Generate a maximum of 2000 tokens`;
-  let promptTokenLimit = finalPrompt.length/4;
+  let finalPrompt = `Based on the directory structure of a create-react-app project, give me complete frontend code to ${prompt}. For all files and the code you give make sure to specify a directory structure in the format of ${projectName}/{foldername}, if the file belongs to a folder, at the top of each code. If a new folder is being created other than src and public, specify the name of the folders and their directory at the top of the response. Generate complete code for each, and if there isn't enough information or enough tokens to generate code for a file, leave it blank. Generate complete code for each file in the src folder. Finish the entire code.`;
+  let promptTokenLimit = parseInt(finalPrompt.length/4);
   console.log(promptTokenLimit);
   // const spinner = ora("Wielding AI powers").start();
   const content = await generateContent(openAiApi, finalPrompt, promptTokenLimit);
